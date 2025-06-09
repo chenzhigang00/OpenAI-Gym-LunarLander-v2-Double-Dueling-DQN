@@ -25,17 +25,33 @@ state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.n
 agent = Agent(state_size=state_dim, action_size=action_dim)
 
-agent.qnetwork_local.load_state_dict(torch.load('checkpoint.pth'))
+n_episodes = 1500
+max_t=1000
+eps_start=1.0
+eps_end=0.01
+eps_decay=0.995
+episode_rewards = []
+eps = eps_start
 
-for i in range(5):
-    state = env.reset()
-    img = plt.imshow(env.render(mode='rgb_array'))
-    for j in range(600):
-        action = agent.act(state)
-        img.set_data(env.render(mode='rgb_array')) 
-        plt.axis('off')
-        state, reward, done, _ = env.step(action)
+for i_episode in range(1, n_episodes+1):
+    state, _ = env.reset()
+    score = 0
+    for t in range(max_t):      # 采样
+        action = agent.act(state, eps)
+        next_state, reward, terminated, truncated, _= env.step(action)
+        done = terminated or truncated
+        agent.step(state, action, reward, next_state, done)
+        score += reward
+        state = next_state
         if done:
-            break 
-            
-env.close()
+            break
+    episode_rewards.append(score)
+    if i_episode % 10 == 0:
+        avg = np.mean(episode_rewards[-10:])
+        print(f"Episode {i_episode}, Avg Reward: {avg:.2f}")
+    eps = max(eps_end, eps_decay*eps)
+    
+
+torch.save(agent.qnetwork_local.state_dict(), 'checkpoint.pth')
+
+np.save("rewards.npy", episode_rewards)

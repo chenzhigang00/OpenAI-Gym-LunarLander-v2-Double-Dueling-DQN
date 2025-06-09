@@ -14,9 +14,6 @@ BUFFER_SIZE = int(1e5)
 BATCH_SIZE = 64          
 GAMMA = 0.99             
 TAU = 1e-3               # 目标网络参数软更新
-epsilon = epsilon_start = 1.0
-epsilon_end = 0.01
-epsilon_decay = 0.995
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -35,12 +32,9 @@ class Agent():
         self.memory.add(state, action, reward, next_state, done)        
         if len(self.memory) > BATCH_SIZE:
             experiences = self.memory.sample()   # 采样
-            self.learn(experiences, GAMMA)
+            self.learn(experiences, GAMMA)  # 更新
                 
-    def act(self, state):
-        global epsilon
-        epsilon = max(epsilon_end, epsilon_decay * epsilon)
-        eps = epsilon
+    def act(self, state, eps):
         state = torch.from_numpy(state).float().unsqueeze(0).to(device)
         self.qnetwork_local.eval()
         with torch.no_grad():
