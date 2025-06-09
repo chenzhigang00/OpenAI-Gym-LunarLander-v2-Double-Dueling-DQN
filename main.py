@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from doubleDQN_agent import Agent
 from qnet import QNetwork
 
-def seed_everything(seed=42):
+def seed_everything(seed=39):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -20,7 +20,7 @@ def seed_everything(seed=42):
 env = gym.make("LunarLander-v3", continuous = False, gravity = -10.0,
                enable_wind = False, wind_power=15.0, turbulence_power=1.5, render_mode=None)  # LunarLander-v3 with Gymnasium
 seed_everything()
-env.reset(seed=42)
+env.reset(seed=39)
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.n
 agent = Agent(state_size=state_dim, action_size=action_dim)
@@ -52,6 +52,6 @@ for i_episode in range(1, n_episodes+1):
     eps = max(eps_end, eps_decay*eps)
     
 
-torch.save(agent.qnetwork_local.state_dict(), 'checkpoint.pth')
+torch.save(agent.qnetwork_local.state_dict(), 'checkpoint_3.pth')
 
-np.save("rewards.npy", episode_rewards)
+np.save("rewards_3.npy", episode_rewards)
